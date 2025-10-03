@@ -55,9 +55,12 @@ export default function Page() {
         }
     };
 
+    
 useEffect(() => {
         fetchCategories();
         fetchArticle();
+        
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleThumbnailChange = (e) => {

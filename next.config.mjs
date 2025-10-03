@@ -1,6 +1,8 @@
 
 const nextConfig = {
-     output: 'export', // Enable static exports
+
+    
+     
      distDir: 'out', // (Optional) Custom output directory
      unoptimized: true, 
      reactStrictMode: true,
@@ -20,3 +22,5 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+  

@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { Header, Footer, Category } from "../components";
 import { defaultArticle, defaultAvatar } from "../components/images";
@@ -10,8 +9,9 @@ import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Page() {
 
+
+export default function Page () {
 
     const router = useRouter();
     const params = useParams();
@@ -65,7 +65,7 @@ export default function Page() {
 
         setArticle(articleData);
    
-          setLikes(articleData?.like);
+        setLikes(articleData?.like);
 
 
           if (user) {
@@ -155,8 +155,6 @@ export default function Page() {
         }
     
     };
-       
-  
  const handleLikeArticle = async () => {
         if (!user) {
             alert("Login to like this article");
@@ -278,6 +276,7 @@ console.log("Fetching likes for article ID:", article.id);
             console.error("Article is not defined or lacks an ID.");
             setLoading(false); // Stop loading if article is not available
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [article]);
 
     const fetchLikes = async () => {
@@ -300,7 +299,11 @@ console.log("Fetching likes for article ID:", article.id);
     useEffect(() => {
     fetchArticleData();
     fetchComments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [article.id])
+
+
+    
 return (
     
     <div>
@@ -395,3 +398,4 @@ return (
     </div>
 )
 }
+

@@ -10,6 +10,8 @@ import { ProviderSlider } from "@/components/ProviderSlider";
 import { useSwipeable } from 'react-swipeable';
 export default function Home() {
  
+
+
   const [mostPopularArticle, setMostPopularArticle] = useState(null);
    
 
@@ -482,7 +484,7 @@ export default function Home() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
               {articles?.length > 0 ? (
-                articles.slice(0, 12).map((article, index) => (
+                articles.slice(0, 16).map((article, index) => (
                   <div 
                     key={article.id || index}
                     className="group relative transition-transform duration-300 hover:scale-[1.02]"

@@ -1,6 +1,14 @@
-// src/app/author/[id]/page.js
 export async function generateStaticParams() {
-  // Add this function or import it
-  const authors = await fetchAuthors(); // Ensure this function exists
-  return authors.map((author) => ({ id: author.id }));
+
+  const { data: articles } = await supabase
+    .from('article')
+    .select('slug');
+
+  return articles?.map(article => ({
+    slug: article.slug
+  })) || [];
+}
+
+
+export default function Page() {
 }
