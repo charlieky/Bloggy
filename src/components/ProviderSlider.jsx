@@ -15,7 +15,7 @@ const providers = [
 ]
 
 const ProviderCard = ({ image }) => (
-  <div className="w-102 h-55 transition-all duration-300 group bg-card text-card-foreground rounded-lg border shadow-sm">
+  <div className="w-102 h-55 transition-all duration-300 group ">
     <div className="p-2 h-full flex flex-col justify-between">
       <div className="flex-1 relative">
         <img src={`/assets/elements/${image}`} alt="" className="w-full h-full" />

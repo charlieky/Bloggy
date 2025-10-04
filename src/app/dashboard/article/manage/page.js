@@ -118,6 +118,8 @@ export default function Page() {
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
 
+    console.log("[v0] Generated slug:", slug, "from title:", title)
+
     try {
       // Edit Mode
       if (articleId) {
@@ -129,6 +131,7 @@ export default function Page() {
             category_id: category,
             thumbnail: thumbnailUrl || undefined,
             read_time: readTime,
+            slug, // Add slug to update
           })
           .eq("id", articleId)
           .eq("profile_id", user?.id)
@@ -142,6 +145,13 @@ export default function Page() {
 
         toast.success("Article updated successfully")
       } else {
+        console.log("[v0] Creating article with data:", {
+          title,
+          slug,
+          category_id: category,
+          profile_id: user?.id,
+        })
+
         const { data, error } = await supabase
           .from("article")
           .insert({
@@ -153,8 +163,11 @@ export default function Page() {
             slug,
             profile_id: user?.id,
           })
-          .select("id")
+          .select("*")
           .single()
+
+        console.log("[v0] Article created:", data)
+        console.log("[v0] Creation error:", error)
 
         if (error) {
           toast.error("Failed to create article")
@@ -164,18 +177,20 @@ export default function Page() {
         }
 
         toast.success("Article created successfully")
-        router.push(`/dashboard/article/manage?id=${data?.id}`)
-        return // Ensure the function ends here
+        console.log("[v0] Navigating to article:", `/${data?.slug}`)
+
+        router.push(`/${data?.slug}`)
+        return
       }
 
       // Navigate to home page after successful submission
       console.log("Navigating to home page...")
-      router.push("/dashboard") // Directly navigate to home without setTimeout
+      router.push("/dashboard")
     } catch (error) {
       console.error("Error submitting form:", error)
       toast.error("An error occurred while submitting the form.")
     } finally {
-      setLoading(false) // Ensure loading state is reset
+      setLoading(false)
     }
   }
 

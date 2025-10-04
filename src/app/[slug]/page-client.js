@@ -25,61 +25,51 @@ export default function ArticlePageClient() {
   const [bookmarked, setBookmarked] = useState(false)
 
   useEffect(() => {
-    fetchArticleData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug])
+    const fetchArticleData = async () => {
+      if (!slug) return
 
-  const fetchArticleData = async () => {
-    setLoading(true)
+      setLoading(true)
+      console.log("[v0] Fetching article with slug:", slug)
 
-    const { data: articleData, error: articleError } = await supabase
-      .from("article")
-      .select(
-        `
-                id, title, content, thumbnail, date_created, views, read_time, slug,
-                category: category_id(title),
-                author: profile_id(id, full_name, image, job_title),
-                comment(id, comment, date_created, profile: profile_id(full_name, image)),    
-                like(id, profile_id, date_created)     
-            `,
-      )
-      .eq("slug", slug)
-      .single()
+      const { data: articleData, error: articleError } = await supabase
+        .from("article")
+        .select(
+          `
+          *,
+          category:category_id (id, title, slug),
+          profile:profile_id (id, full_name, username, avatar_url)
+        `,
+        )
+        .eq("slug", slug)
+        .single()
 
-    if (articleError) {
-      toast.error("Failed to fetch article")
-      console.log("Failed to fetch article:", articleError)
-      setLoading(false)
-      return
-    }
+      console.log("[v0] Article fetch result:", { articleData, articleError })
 
-    const { error: updateError } = await supabase
-      .from("article")
-      .update({ views: (articleData?.views || 0) + 1 })
-      .eq("id", articleData?.id)
-
-    if (updateError) {
-      console.error("Failed to update views: ", updateError)
-    }
-
-    setArticle({ ...articleData, views: (articleData?.views || 0) + 1 })
-    setComments(articleData?.comment || [])
-    setLikes(articleData?.like || [])
-
-    if (user && articleData?.id) {
-      const { data: bookmarkData, error: bookmarkError } = await supabase
-        .from("bookmark")
-        .select("id")
-        .eq("profile_id", profile?.id)
-        .eq("article_id", articleData?.id)
-        .maybeSingle()
-      if (bookmarkError) {
-        console.error("Bookmark fetch error: ", bookmarkError)
+      if (articleError) {
+        console.error("[v0] Error fetching article:", articleError)
+        toast.error("Article not found")
+        setLoading(false)
+        return
       }
-      setBookmarked(Boolean(bookmarkData))
+
+      setArticle(articleData)
+
+      if (articleData?.id) {
+        // Increment view count
+        const { error: viewError } = await supabase.rpc("increment_article_views", {
+          article_id: articleData.id,
+        })
+
+        if (viewError) {
+          console.error("[v0] Error incrementing views:", viewError)
+        }
+      }
+
+      setLoading(false)
     }
-    setLoading(false)
-  }
+
+    fetchArticleData()
+  }, [slug])
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {
@@ -306,9 +296,9 @@ export default function ArticlePageClient() {
                 <Image
                   width={100}
                   height={100}
-                  src={article?.author?.image || defaultAvatar}
+                  src={article?.profile?.avatar_url || defaultAvatar}
                   className="w-[5rem] h-[5rem] rounded-full"
-                  alt={article?.author?.full_name || "Author"}
+                  alt={article?.profile?.full_name || "Author"}
                 />
                 <Image
                   width={500}
@@ -318,8 +308,8 @@ export default function ArticlePageClient() {
                   alt=""
                 />
                 <div>
-                  <h1 className="text-3xl font-bold">{article?.author?.full_name}</h1>
-                  <p>{article?.author?.job_title || "Writer at Desphixs"} </p>
+                  <h1 className="text-3xl font-bold">{article?.profile?.full_name}</h1>
+                  <p>{article?.profile?.job_title || "Writer at Desphixs"} </p>
                 </div>
               </div>
               <div>
