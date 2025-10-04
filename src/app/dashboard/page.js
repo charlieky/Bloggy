@@ -18,15 +18,14 @@ export default function Page() {
     const [notifications, setNotifications] = useState([]);
     const [loadingDashboardStats, setLoadingDashboardStats] = useState(false);
 
-    
-    const fetchDashboardData = useCallback(async () => {
+    const fetchDashboardData = async () => {
+        
         if (!profile?.id) return;
         setLoadingDashboardStats(true);
 
-       try {
-            const { data: articles, error: articleError } = await supabase
-                .from("article")
-                .select(
+        const { data: articles, error: articleError } = await supabase
+            .from("article")
+            .select(
                 `
                 id, title, content, thumbnail, date_created, views, read_time, slug,
                 category:category_id (title),
@@ -38,34 +37,24 @@ export default function Page() {
             .eq("profile_id", profile?.id)
             .order("date_created", { ascending: false });
 
-                if (articleError) throw articleError;
-
+        if (articleError) {
+            toast.error("Error fetching articles");
+            console.log("Error fetching articles", articleError);
+            setLoadingDashboardStats(false);
+            return;
+        }
 
         const articleIds = articles?.map((article) => article?.id);
         // const articlsIds = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-        const [
-                { data: likes, error: likesError },
-                { data: comments, error: commentsError },
-                { data: notifications, error: notificationsError }
-            ] = await Promise.all([
-                supabase.from("like").select("id").in("article_id", articleIds),
-                supabase
-                    .from("comment")
-                    .select("id, comment, date_created, profile:profile_id(full_name, image)")
-                    .in("article_id", articleIds)
-                    .order("date_created", { ascending: false }),
-                supabase
-                    .from("notification")
-                    .select("id, message, type, date_created")
-                    .eq("receiver_id", profile?.id)
-                    .eq("is_read", false)
-                    .order("date_created", { ascending: false })
-            ]);
+        const [{ data: likes, error: likesError }, { data: comments, error: commentsError }, { data: notifications, error: notificationsError }] = await Promise.all([supabase.from("like").select("id").in("article_id", articleIds), supabase.from("comment").select("id, comment, date_created, profile:profile_id(full_name, image)").in("article_id", articleIds).order("date_created", { ascending: false }), supabase.from("notification").select("id, message, type, date_created").eq("receiver_id", profile?.id).eq("is_read", false).order("date_created", { ascending: false })]);
 
-            if (likesError || commentsError || notificationsError) {
-                throw new Error("Error fetching related data");
-            }
+        if (likesError || commentsError || notificationsError) {
+            toast.error("Error fetching articles");
+            console.log("Error fetching articles", articleError);
+            setLoadingDashboardStats(false);
+            return;
+        }
 
         const statsArray = [
             { title: "Views", value: articles?.reduce((sum, a) => sum + a.views, 0), icon: "fas fa-eye", bg: "bg-orange-200", text: "text-orange-600" },
@@ -78,21 +67,11 @@ export default function Page() {
         console.log(statsArray);
 
         setArticles(articles);
-            setComments(comments);
-            setNotifications(notifications);
-            setStats(statsArray);
-        } catch (error) {
-            toast.error("Error loading dashboard data");
-            console.error("Dashboard error:", error);
-        } finally {
-            setLoadingDashboardStats(false);
-        }
-    }, [profile?.id]);
-
-    useEffect(() => {
-        if (!profile?.id) return;
-        fetchDashboardData();
-    }, [profile?.id, fetchDashboardData]);
+        setComments(comments);
+        setNotifications(notifications);
+        setStats(statsArray);
+        setLoadingDashboardStats(false);
+    };
 
     const deletePost = async (postId) => {
         const { error } = await supabase.from("article").delete().eq("id", postId);
@@ -101,11 +80,17 @@ export default function Page() {
             toast.error("Error deleting post");
             console.log("Error deleting post", error);
             return;
+        } else {
+            toast.success("Post deleted successfully");
+            setArticles((prev) => prev.filter((article) => article.id !== postId));
         }
-        toast.success("Post deleted successfully");
-        setArticles((prev) => prev.filter((article) => article.id !== postId));
     };
 
+    useEffect(() => {
+        if (!profile?.id) return;
+        fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profile?.id]);
 
 
 

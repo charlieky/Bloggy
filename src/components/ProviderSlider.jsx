@@ -1,5 +1,3 @@
-import { Card } from "@/components/ui/card";
-
 const providers = [
   { name: "PRAGMATIC PLAY", games: 217, image: "provider-1.svg" },
   { name: "POCKET GAMES SOFT", games: 137, image: "provider-2.svg" },
@@ -14,21 +12,17 @@ const providers = [
   { name: "PLATIPUS", games: 66, image: "provider-11.svg" },
   { name: "PLATIPUS", games: 66, image: "provider-12.svg" },
   { name: "PLATIPUS", games: 66, image: "provider-13.svg" },
-];
+]
 
 const ProviderCard = ({ image }) => (
-  <Card className="w-102 h-55 transition-all duration-300 group">
+  <div className="w-102 h-55 transition-all duration-300 group bg-card text-card-foreground rounded-lg border shadow-sm">
     <div className="p-2 h-full flex flex-col justify-between">
       <div className="flex-1 relative">
-        <img
-          src={`/assets/elements/${image}`}
-          alt=""
-          className="w-full h-full"
-        />
+        <img src={`/assets/elements/${image}`} alt="" className="w-full h-full" />
       </div>
     </div>
-  </Card>
-);
+  </div>
+)
 
 export const ProviderSlider = () => {
   return (
@@ -43,5 +37,5 @@ export const ProviderSlider = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

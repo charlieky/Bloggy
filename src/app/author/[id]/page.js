@@ -1,14 +1,18 @@
+import { supabase } from "@/lib/supabaseClient"
+import AuthorPageClient from "./page-client"
+
 export async function generateStaticParams() {
+  const { data: profiles } = await supabase.from("profile").select("id")
 
-  const { data: articles } = await supabase
-    .from('article')
-    .select('slug');
-
-  return articles?.map(article => ({
-    slug: article.slug
-  })) || [];
+  return (
+    profiles?.map((profile) => ({
+      id: profile.id.toString(),
+    })) || []
+  )
 }
 
+export default async function AuthorPage({ params }) {
+  const { id } = await params
 
-export default function Page() {
+  return <AuthorPageClient id={id} />
 }
